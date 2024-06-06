@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
-// Insert user
+
+
+
 router.post('/users', async (req, res) => {
   const { name, email, registration_date } = req.body;
   try {
@@ -13,7 +15,7 @@ router.post('/users', async (req, res) => {
   }
 });
 
-// Get all users
+
 router.get('/users', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM users');
@@ -23,7 +25,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
-// Get user by ID
+
 router.get('/users/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -37,7 +39,7 @@ router.get('/users/:id', async (req, res) => {
   }
 });
 
-// Update user by ID
+
 router.put('/users/:id', async (req, res) => {
   const { id } = req.params;
   const { name, email, registration_date } = req.body;
@@ -52,7 +54,7 @@ router.put('/users/:id', async (req, res) => {
   }
 });
 
-// Delete user by ID
+
 router.delete('/users/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -66,10 +68,9 @@ router.delete('/users/:id', async (req, res) => {
   }
 });
 
-// Repeat the same pattern for machines, tapes, assignments, machine_tapes, and tape_consumption
-// Example for machines
 
-// Insert machine
+
+
 router.post('/machines', async (req, res) => {
   const { name, description, purchase_date } = req.body;
   try {
@@ -80,7 +81,7 @@ router.post('/machines', async (req, res) => {
   }
 });
 
-// Get all machines
+
 router.get('/machines', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM machines');
@@ -90,7 +91,7 @@ router.get('/machines', async (req, res) => {
   }
 });
 
-// Get machine by ID
+
 router.get('/machines/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -104,7 +105,7 @@ router.get('/machines/:id', async (req, res) => {
   }
 });
 
-// Update machine by ID
+
 router.put('/machines/:id', async (req, res) => {
   const { id } = req.params;
   const { name, description, purchase_date } = req.body;
@@ -119,7 +120,7 @@ router.put('/machines/:id', async (req, res) => {
   }
 });
 
-// Delete machine by ID
+
 router.delete('/machines/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -133,34 +134,167 @@ router.delete('/machines/:id', async (req, res) => {
   }
 });
 
-// Insert tape
+
+
+
 router.post('/tapes', async (req, res) => {
-    const { name, description, acquisition_date } = req.body;
+  const { name, description, acquisition_date } = req.body;
+  try {
+    const [result] = await db.query('INSERT INTO tapes (name, description, acquisition_date) VALUES (?, ?, ?)', [name, description, acquisition_date]);
+    res.status(201).json({ id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.get('/tapes', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM tapes');
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.get('/tapes/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query('SELECT * FROM tapes WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Tape not found' });
+    }
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.put('/tapes/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, description, acquisition_date } = req.body;
+  try {
+    const [result] = await db.query('UPDATE tapes SET name = ?, description = ?, acquisition_date = ? WHERE id = ?', [name, description, acquisition_date, id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Tape not found' });
+    }
+    res.status(200).json({ message: 'Tape updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.delete('/tapes/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.query('DELETE FROM tapes WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Tape not found' });
+    }
+    res.status(200).json({ message: 'Tape deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+
+router.post('/assignments', async (req, res) => {
+  const { user_id, machine_id, assignment_date } = req.body;
+  try {
+    const [result] = await db.query('INSERT INTO assignments (user_id, machine_id, assignment_date) VALUES (?, ?, ?)', [user_id, machine_id, assignment_date]);
+    res.status(201).json({ id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.get('/assignments', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM assignments');
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.get('/assignments/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query('SELECT * FROM assignments WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.put('/assignments/:id', async (req, res) => {
+  const { id } = req.params;
+  const { user_id, machine_id, assignment_date } = req.body;
+  try {
+    const [result] = await db.query('UPDATE assignments SET user_id = ?, machine_id = ?, assignment_date = ? WHERE id = ?', [user_id, machine_id, assignment_date, id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+    res.status(200).json({ message: 'Assignment updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+router.delete('/assignments/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await db.query('DELETE FROM assignments WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+    res.status(200).json({ message: 'Assignment deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+router.post('/machine_tapes', async (req, res) => {
+    const { tape_id, machine_id, quantity } = req.body;
     try {
-      const [result] = await db.query('INSERT INTO tapes (name, description, acquisition_date) VALUES (?, ?, ?)', [name, description, acquisition_date]);
+      const [result] = await db.query('INSERT INTO machine_tapes (tape_id, machine_id, quantity) VALUES (?, ?, ?)', [tape_id, machine_id, quantity]);
       res.status(201).json({ id: result.insertId });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   });
   
- 
-  router.get('/tapes', async (req, res) => {
+  
+  router.get('/machine_tapes', async (req, res) => {
     try {
-      const [rows] = await db.query('SELECT * FROM tapes');
+      const [rows] = await db.query('SELECT * FROM machine_tapes');
       res.status(200).json(rows);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   });
   
- 
-  router.get('/tapes/:id', async (req, res) => {
+  
+  router.get('/machine_tapes/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const [rows] = await db.query('SELECT * FROM tapes WHERE id = ?', [id]);
+      const [rows] = await db.query('SELECT * FROM machine_tapes WHERE id = ?', [id]);
       if (rows.length === 0) {
-        return res.status(404).json({ error: 'Tape not found' });
+        return res.status(404).json({ error: 'Machine Tape not found' });
       }
       res.status(200).json(rows[0]);
     } catch (err) {
@@ -168,35 +302,100 @@ router.post('/tapes', async (req, res) => {
     }
   });
   
- 
-  router.put('/tapes/:id', async (req, res) => {
+  
+  router.put('/machine_tapes/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, description, acquisition_date } = req.body;
+    const { tape_id, machine_id, quantity } = req.body;
     try {
-      const [result] = await db.query('UPDATE tapes SET name = ?, description = ?, acquisition_date = ? WHERE id = ?', [name, description, acquisition_date, id]);
+      const [result] = await db.query('UPDATE machine_tapes SET tape_id = ?, machine_id = ?, quantity = ? WHERE id = ?', [tape_id, machine_id, quantity, id]);
       if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'Tape not found' });
+        return res.status(404).json({ error: 'Machine Tape not found' });
       }
-      res.status(200).json({ message: 'Tape updated successfully' });
+      res.status(200).json({ message: 'Machine Tape updated successfully' });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   });
   
- 
-  router.delete('/tapes/:id', async (req, res) => {
+  
+  router.delete('/machine_tapes/:id', async (req, res) => {
     const { id } = req.params;
     try {
-      const [result] = await db.query('DELETE FROM tapes WHERE id = ?', [id]);
+      const [result] = await db.query('DELETE FROM machine_tapes WHERE id = ?', [id]);
       if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'Tape not found' });
+        return res.status(404).json({ error: 'Machine Tape not found' });
       }
-      res.status(200).json({ message: 'Tape deleted successfully' });
+      res.status(200).json({ message: 'Machine Tape deleted successfully' });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   });
-  
 
+
+  
+router.post('/tape_consumption', async (req, res) => {
+    const { machine_id, tape_id, consumption_date, quantity_consumed } = req.body;
+    try {
+      const [result] = await db.query('INSERT INTO tape_consumption (machine_id, tape_id, consumption_date, quantity_consumed) VALUES (?, ?, ?, ?)', [machine_id, tape_id, consumption_date, quantity_consumed]);
+      res.status(201).json({ id: result.insertId });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  
+  router.get('/tape_consumption', async (req, res) => {
+    try {
+      const [rows] = await db.query('SELECT * FROM tape_consumption');
+      res.status(200).json(rows);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  
+  router.get('/tape_consumption/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+      const [rows] = await db.query('SELECT * FROM tape_consumption WHERE id = ?', [id]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'Tape Consumption record not found' });
+      }
+      res.status(200).json(rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  
+  router.put('/tape_consumption/:id', async (req, res) => {
+    const { id } = req.params;
+    const { machine_id, tape_id, consumption_date, quantity_consumed } = req.body;
+    try {
+      const [result] = await db.query('UPDATE tape_consumption SET machine_id = ?, tape_id = ?, consumption_date = ?, quantity_consumed = ? WHERE id = ?', [machine_id, tape_id, consumption_date, quantity_consumed, id]);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Tape Consumption record not found' });
+      }
+      res.status(200).json({ message: 'Tape Consumption record updated successfully' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  
+  router.delete('/tape_consumption/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+      const [result] = await db.query('DELETE FROM tape_consumption WHERE id = ?', [id]);
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Tape Consumption record not found' });
+      }
+      res.status(200).json({ message: 'Tape Consumption record deleted successfully' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+  
+  
 
 module.exports = router;
