@@ -346,7 +346,9 @@ router.post('/tape_consumption', async (req, res) => {
   
   router.get('/tape_consumption', async (req, res) => {
     try {
-      const [rows] = await db.query('SELECT * FROM tape_consumption');
+      const [rows] = await db.query(`SELECT tc.id, u.name "name", m.name "machine", tc.quantity_consumed, tc.consumption_date, t.name "tape"  FROM tape_consumption tc LEFT JOIN tapes t on t.id = tc.tape_id
+      LEFT JOIN machines m on m.id = tc.machine_id JOIN assignments a on a.machine_id = m.id
+       LEFT JOIN users u on u.id = a.user_id ORDER BY tc.id DESC;`);
       res.status(200).json(rows);
     } catch (err) {
       res.status(500).json({ error: err.message });
